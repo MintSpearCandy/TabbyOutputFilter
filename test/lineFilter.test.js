@@ -1,7 +1,7 @@
 /* Standalone smoke test for the line filter logic.
  * Run: npm test */
 const assert = require('assert')
-const { LineFilter } = require('../test-build/lineFilter')
+const { LineFilter, toCrlf } = require('../test-build/lineFilter')
 
 function run (name, fn) {
     try {
@@ -145,6 +145,19 @@ run('stats count matched/total', () => {
     f.process(Buffer.from('a1\nb2\na3\n'))
     assert.strictEqual(f.stats.total, 3)
     assert.strictEqual(f.stats.matched, 2)
+})
+
+run('toCrlf converts bare LF for terminal display', () => {
+    assert.strictEqual(toCrlf(Buffer.from('x1\nx2\n')).toString('utf8'), 'x1\r\nx2\r\n')
+})
+
+run('toCrlf does not double-convert existing CRLF', () => {
+    assert.strictEqual(toCrlf(Buffer.from('a\r\nb\n')).toString('utf8'), 'a\r\nb\r\n')
+})
+
+run('toCrlf passes through data without newlines', () => {
+    const input = Buffer.from('unterminated tail')
+    assert.strictEqual(toCrlf(input), input)
 })
 
 console.log(process.exitCode ? '\nSOME TESTS FAILED' : '\nALL TESTS PASSED')

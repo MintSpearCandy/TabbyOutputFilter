@@ -43,6 +43,19 @@ export function sanitizeText (text: string): string {
 }
 
 /**
+ * Sanitized filter output uses bare \n line endings, but a terminal
+ * interprets a lone \n as "line feed without carriage return", which renders
+ * as a staircase. Convert to \r\n for display; the recording stream keeps
+ * plain \n (standard for log files).
+ */
+export function toCrlf (data: Buffer): Buffer {
+    if (!data.includes(0x0a)) {
+        return data
+    }
+    return Buffer.from(data.toString('utf8').replace(/(?<!\r)\n/g, '\r\n'))
+}
+
+/**
  * Line-oriented stream filter.
  *
  * Lines are split at the Buffer level on 0x0A, which is UTF-8 safe because

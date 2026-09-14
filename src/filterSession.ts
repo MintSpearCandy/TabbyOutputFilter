@@ -2,7 +2,7 @@ import colors from 'ansi-colors'
 import { Observable, Subject } from 'rxjs'
 import { Logger } from 'tabby-core'
 import { BaseSession } from 'tabby-terminal'
-import { LineFilter } from './lineFilter'
+import { LineFilter, toCrlf } from './lineFilter'
 
 /**
  * A display-only session: it has no process behind it, it only re-emits
@@ -60,7 +60,7 @@ export class FilterSession extends BaseSession {
     pushChunk (chunk: Buffer): void {
         const out = this.filter.process(chunk)
         if (out) {
-            this.emitOutput(out)
+            this.emitOutput(toCrlf(out))
             this.matchedOutput.next(out)
         }
     }
@@ -69,7 +69,7 @@ export class FilterSession extends BaseSession {
     flushPartialLine (): void {
         const out = this.filter.flushPartial()
         if (out) {
-            this.emitOutput(out)
+            this.emitOutput(toCrlf(out))
             this.matchedOutput.next(out)
         }
     }
@@ -90,7 +90,7 @@ export class FilterSession extends BaseSession {
             if (drained.droppedLines > 0) {
                 this.notice(`resumed, ${drained.droppedLines} oldest buffered line(s) were dropped`)
             }
-            this.emitOutput(drained.data)
+            this.emitOutput(toCrlf(drained.data))
             this.matchedOutput.next(drained.data)
         }
     }
