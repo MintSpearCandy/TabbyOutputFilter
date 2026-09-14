@@ -111,9 +111,26 @@ async function main () {
     console.log(`      asset: ${path.basename(assetPath)} (${(assetBytes / 1024).toFixed(1)} KB)`)
 
     console.log('[3/6] Pushing main')
-    // The per-invocation proxy override keeps the credential manager away
-    // from a socks5 http.proxy it cannot handle
-    run('git', ['-c', 'http.https://github.com.proxy=', 'push'])
+    // Attempt order: first without the (socks5) proxy — the credential
+    // manager cannot use socks proxies — then with the user's configured
+    // proxy as fallback for when direct access is flaky.
+    let pushed = false
+    for (const args of [['-c', 'http.https://github.com.proxy=', 'push'], ['push']]) {
+        for (let attempt = 1; attempt <= 2 && !pushed; attempt++) {
+            const r = spawnSync('git', args, { cwd: root, stdio: 'inherit' })
+            if (r.status === 0) {
+                pushed = true
+                break
+            }
+            console.error(`      push failed (${args.includes('push') && args.length === 1 ? 'configured proxy' : 'direct'} #${attempt})`)
+        }
+        if (pushed) {
+            break
+        }
+    }
+    if (!pushed) {
+        fail('could not push to origin — check network / proxy')
+    }
 
     if (dryRun) {
         console.log('[4/6] --dry-run: skipping GitHub API calls')
