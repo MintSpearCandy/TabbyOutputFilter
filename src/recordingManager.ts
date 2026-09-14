@@ -224,7 +224,7 @@ export class RecordingManager {
      * {mode}.
      */
     private buildPath (mode: 'full'|'filtered', ctx: { title: string, pattern: string }): string {
-        const config = this.config.store.filterOutput?.recording ?? {}
+        const config = this.config.store.outputFilter?.recording ?? {}
         const directory = config.directory || os.homedir()
         const template = config.filenameTemplate || '{date}_{time}.log'
 
@@ -244,7 +244,7 @@ export class RecordingManager {
     /** Recording indicator shown at the top-right of the recorded terminal */
     private attachFullUI (tab: BaseTerminalTabComponent<any>, filePath: string): HTMLElement {
         const ui = document.createElement('div')
-        ui.classList.add('filter-output-recording-ui')
+        ui.classList.add('output-filter-recording-ui')
 
         const dot = document.createElement('span')
         dot.classList.add('rec-dot')

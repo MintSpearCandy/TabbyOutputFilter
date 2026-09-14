@@ -28,9 +28,9 @@ export interface FilterHistoryEntry {
 
 export function makeFilterProfile (options: Partial<FilterOptions>): FilterProfile {
     return {
-        id: `filter:${Date.now().toString(36)}`,
-        type: 'filter',
-        name: 'Filter',
+        id: `output-filter:${Date.now().toString(36)}`,
+        type: 'output-filter',
+        name: 'Output filter',
         group: '',
         options: {
             pattern: '',

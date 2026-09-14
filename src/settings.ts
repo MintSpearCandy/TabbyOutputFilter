@@ -6,9 +6,9 @@ import { FilterSettingsTabComponent } from './settingsTab.component'
 /** @hidden */
 @Injectable()
 export class FilterSettingsTabProvider extends SettingsTabProvider {
-    id = 'filter-output'
+    id = 'output-filter'
     icon = 'filter'
-    title = 'Filter Output'
+    title = 'Output Filter'
 
     getComponentType (): any {
         return FilterSettingsTabComponent

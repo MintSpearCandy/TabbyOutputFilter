@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * High-frequency log output stress tester for tabby-filter-output.
+ * High-frequency log output stress tester for tabby-output-filter.
  *
  * Live mode (default) — floods stdout with realistic log traffic.
  * Run it in a terminal inside Tabby, point a filter pane and/or a recording

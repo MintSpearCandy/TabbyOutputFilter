@@ -1,4 +1,4 @@
-# tabby-filter-output
+# tabby-output-filter
 
 A [Tabby](https://github.com/Eugeny/tabby) plugin that streams **filtered output** of one terminal into another terminal pane.
 
@@ -31,7 +31,7 @@ An empty pattern passes every line through (a live `tail -f` view of the termina
 
 - **Regex is evaluated on the renderer thread**: a pathological pattern with catastrophic backtracking (e.g. `(a+)+$`) typed into your own filter can freeze the window until it finishes. Since the pattern is always user-authored, this is self-inflicted by design.
 - The source stream is taken from the terminal tab's output passthrough (`enablePassthrough`, on by default). Another plugin that disables passthrough on a tab also stops its filter output.
-- Buffers are bounded: an unterminated line is force-flushed after 1 MiB, and the pause buffer drops its oldest entries beyond a configurable limit (`filterOutput.pauseBufferLimitBytes` in `config.yaml`).
+- Buffers are bounded: an unterminated line is force-flushed after 1 MiB, and the pause buffer drops its oldest entries beyond a configurable limit (`outputFilter.pauseBufferLimitBytes` in `config.yaml`).
 
 ## Building from source
 
@@ -43,14 +43,14 @@ npm run build
 ## Packaging & installing
 
 ```bash
-npm run package            # build + stage release/tabby-filter-output/ + zip
+npm run package            # build + stage release/tabby-output-filter/ + zip
 npm run package:install    # same, then copy it into Tabby's plugins dir
 ```
 
 `npm run package` produces a self-contained package in `release/`:
 
-- `tabby-filter-output/` — drop this folder into `%USERPROFILE%\.tabby\plugins\node_modules\`
-- `tabby-filter-output-<version>.zip` — same content as an archive
+- `tabby-output-filter/` — drop this folder into `%USERPROFILE%\.tabby\plugins\node_modules\`
+- `tabby-output-filter-<version>.zip` — same content as an archive
 
 The package needs no `node_modules` of its own: runtime modules (`tabby-core`, `tabby-terminal`, `@angular/*`, `rxjs`) are provided by the Tabby app itself, and the remaining dependencies are already inlined into `dist/index.js`.
 

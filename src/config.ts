@@ -3,7 +3,7 @@ import { ConfigProvider } from 'tabby-core'
 /** @hidden */
 export class FilterConfigProvider extends ConfigProvider {
     defaults = {
-        filterOutput: {
+        outputFilter: {
             history: [],
             historyLimit: 20,
             pauseBufferLimitBytes: 1 << 20,
@@ -13,7 +13,7 @@ export class FilterConfigProvider extends ConfigProvider {
             },
         },
         hotkeys: {
-            'filter-output': {
+            'output-filter': {
                 'toggle-panel': 'ctrl+alt+f',
             },
         },

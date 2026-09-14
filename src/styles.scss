@@ -1,5 +1,5 @@
 /* Recording indicator shown at the top-right of a fully recorded terminal */
-.filter-output-recording-ui {
+.output-filter-recording-ui {
     position: absolute;
     top: 10px;
     right: 14px;
@@ -21,7 +21,7 @@
         height: 8px;
         border-radius: 50%;
         background: #e0564f;
-        animation: filter-output-rec-pulse 1.5s ease-in-out infinite;
+        animation: output-filter-rec-pulse 1.5s ease-in-out infinite;
     }
 
     .rec-label {
@@ -46,7 +46,7 @@
     }
 }
 
-@keyframes filter-output-rec-pulse {
+@keyframes output-filter-rec-pulse {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.35; }
 }

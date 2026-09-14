@@ -6,7 +6,7 @@ import { HotkeyDescription, HotkeyProvider, TranslateService } from 'tabby-core'
 export class FilterHotkeyProvider extends HotkeyProvider {
     hotkeys: HotkeyDescription[] = [
         {
-            id: 'filter-output.toggle-panel',
+            id: 'output-filter.toggle-panel',
             name: this.translate.instant('Focus the filter pattern input'),
         },
     ]

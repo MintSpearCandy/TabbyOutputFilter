@@ -17,20 +17,20 @@ export class FilterSettingsTabComponent {
         '{pattern} = filter pattern (or "all"), {mode} = full / filtered'
 
     constructor (public config: ConfigService) {
-        this.historyLimit = config.store.filterOutput?.historyLimit ?? 20
-        this.pauseBufferLimitKB = Math.round((config.store.filterOutput?.pauseBufferLimitBytes ?? 1048576) / 1024)
-        this.recordingDirectory = config.store.filterOutput?.recording?.directory ?? ''
-        this.filenameTemplate = config.store.filterOutput?.recording?.filenameTemplate ?? '{date}_{time}.log'
+        this.historyLimit = config.store.outputFilter?.historyLimit ?? 20
+        this.pauseBufferLimitKB = Math.round((config.store.outputFilter?.pauseBufferLimitBytes ?? 1048576) / 1024)
+        this.recordingDirectory = config.store.outputFilter?.recording?.directory ?? ''
+        this.filenameTemplate = config.store.outputFilter?.recording?.filenameTemplate ?? '{date}_{time}.log'
     }
 
     save (): void {
         const store = this.config.store
-        store.filterOutput ??= {}
-        store.filterOutput.historyLimit = this.clamp(this.historyLimit, 0, 500, 20)
-        store.filterOutput.pauseBufferLimitBytes = this.clamp(this.pauseBufferLimitKB, 64, 65536, 1024) * 1024
-        store.filterOutput.recording ??= {}
-        store.filterOutput.recording.directory = this.recordingDirectory.trim() || null
-        store.filterOutput.recording.filenameTemplate = this.filenameTemplate.trim() || '{date}_{time}.log'
+        store.outputFilter ??= {}
+        store.outputFilter.historyLimit = this.clamp(this.historyLimit, 0, 500, 20)
+        store.outputFilter.pauseBufferLimitBytes = this.clamp(this.pauseBufferLimitKB, 64, 65536, 1024) * 1024
+        store.outputFilter.recording ??= {}
+        store.outputFilter.recording.directory = this.recordingDirectory.trim() || null
+        store.outputFilter.recording.filenameTemplate = this.filenameTemplate.trim() || '{date}_{time}.log'
         this.config.save()
     }
 

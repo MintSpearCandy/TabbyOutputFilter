@@ -5,8 +5,8 @@ import { FilterTabComponent } from './filterTab.component'
 
 @Injectable({ providedIn: 'root' })
 export class FilterProfileProvider extends ConnectableProfileProvider<FilterProfile> {
-    id = 'filter'
-    name = 'Filter'
+    id = 'output-filter'
+    name = 'Output filter'
     configDefaults = {
         options: {
             pattern: '',
@@ -20,9 +20,9 @@ export class FilterProfileProvider extends ConnectableProfileProvider<FilterProf
     async getBuiltinProfiles (): Promise<PartialProfile<FilterProfile>[]> {
         return [
             {
-                id: 'filter:new',
-                type: 'filter',
-                name: 'Filter output',
+                id: 'output-filter:new',
+                type: 'output-filter',
+                name: 'Output filter',
                 icon: 'fas fa-filter',
                 isBuiltin: true,
                 isTemplate: true,
@@ -38,7 +38,7 @@ export class FilterProfileProvider extends ConnectableProfileProvider<FilterProf
     }
 
     getSuggestedName (profile: FilterProfile): string|null {
-        return profile.options.pattern ? `Filter: ${profile.options.pattern}` : 'Filter output'
+        return profile.options.pattern ? `Filter: ${profile.options.pattern}` : 'Output filter'
     }
 
     getDescription (profile: FilterProfile): string {

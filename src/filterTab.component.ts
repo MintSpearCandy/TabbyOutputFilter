@@ -15,7 +15,7 @@ import { LineFilterStats } from './lineFilter'
     animations: BaseTerminalTabComponent.animations,
 })
 export class FilterTabComponent extends ConnectableTerminalTabComponent<FilterProfile> {
-    static readonly FOCUS_PATTERN_HOTKEY = 'filter-output.toggle-panel'
+    static readonly FOCUS_PATTERN_HOTKEY = 'output-filter.toggle-panel'
 
     session: FilterSession|null = null
     sourceTabId: string|null = null
@@ -91,7 +91,7 @@ export class FilterTabComponent extends ConnectableTerminalTabComponent<FilterPr
     async initializeSession (): Promise<void> {
         await super.initializeSession()
 
-        const pauseLimit = this.config.store.filterOutput?.pauseBufferLimitBytes
+        const pauseLimit = this.config.store.outputFilter?.pauseBufferLimitBytes
         const session = new FilterSession(
             this.logger,
             typeof pauseLimit === 'number' && pauseLimit > 0 ? pauseLimit : undefined,
@@ -350,12 +350,12 @@ export class FilterTabComponent extends ConnectableTerminalTabComponent<FilterPr
     }
 
     private get historyLimit (): number {
-        const limit = this.config.store.filterOutput?.historyLimit
+        const limit = this.config.store.outputFilter?.historyLimit
         return typeof limit === 'number' && limit > 0 ? limit : 20
     }
 
     private loadHistory (): void {
-        const stored = this.config.store.filterOutput?.history ?? []
+        const stored = this.config.store.outputFilter?.history ?? []
         this.history = [...stored]
             .sort((a, b) => b.lastUsed - a.lastUsed)
             .slice(0, this.historyLimit)
@@ -373,19 +373,19 @@ export class FilterTabComponent extends ConnectableTerminalTabComponent<FilterPr
             lastUsed: Date.now(),
         }
         const store = this.config.store
-        store.filterOutput ??= {}
+        store.outputFilter ??= {}
         const key = historyEntryKey(entry)
-        let list = (store.filterOutput.history ?? []).filter(x => historyEntryKey(x) !== key)
+        let list = (store.outputFilter.history ?? []).filter(x => historyEntryKey(x) !== key)
         list.unshift(entry)
-        store.filterOutput.history = list.slice(0, this.historyLimit)
+        store.outputFilter.history = list.slice(0, this.historyLimit)
         this.config.save()
         this.loadHistory()
     }
 
     private clearHistory (): void {
         const store = this.config.store
-        store.filterOutput ??= {}
-        store.filterOutput.history = []
+        store.outputFilter ??= {}
+        store.outputFilter.history = []
         this.config.save()
         this.history = []
     }
