@@ -1,0 +1,78 @@
+terminal-toolbar(
+    [tab]='this',
+    (click)='$event.stopPropagation()',
+    (mousedown)='$event.stopPropagation()',
+    (mouseup)='$event.stopPropagation()',
+    (dblclick)='$event.stopPropagation()',
+    (mousemove)='$event.stopPropagation()',
+    (contextmenu)='$event.stopPropagation()',
+)
+    i.fas.fa-xs.fa-circle.text-success.me-2(*ngIf='sourceTabId', title='Streaming from source terminal')
+    i.fas.fa-xs.fa-circle.text-danger.me-2(*ngIf='!sourceTabId', title='No source selected - pick a terminal below')
+
+    .input-group.input-group-sm.filter-input-group
+        input.form-control(
+            #patternInput,
+            type='text',
+            [(ngModel)]='pattern',
+            (keyup.enter)='!$event.isComposing && applyFilter()',
+            (change)='applyFilter()',
+            (keyup.escape)='!$event.isComposing && onPatternEscape()',
+            placeholder='Filter pattern (empty = show all lines)',
+            title='Lines matching this pattern are shown. Press Enter to apply.',
+        )
+        button.btn.btn-outline-secondary.filter-history-button(
+            #historyButton,
+            type='button',
+            (click)='toggleHistoryMenu()',
+            title='Filter history',
+        )
+            i.fas.fa-history
+            i.fas.fa-caret-down.filter-caret
+
+    label.btn.btn-sm.btn-outline-secondary.filter-toggle([class.active]='isRegex', title='Treat the pattern as a regular expression')
+        input.filter-toggle-input(type='checkbox', [(ngModel)]='isRegex', (ngModelChange)='applyFilter()')
+        span .*
+    label.btn.btn-sm.btn-outline-secondary.filter-toggle([class.active]='invert', title='Show lines that do not match')
+        input.filter-toggle-input(type='checkbox', [(ngModel)]='invert', (ngModelChange)='applyFilter()')
+        span !
+    label.btn.btn-sm.btn-outline-secondary.filter-toggle([class.active]='caseSensitive', title='Case-sensitive matching')
+        input.filter-toggle-input(type='checkbox', [(ngModel)]='caseSensitive', (ngModelChange)='applyFilter()')
+        span Aa
+
+    select.form-select.form-select-sm.filter-source-select(
+        [(ngModel)]='selectedSourceId',
+        (ngModelChange)='onSourceSelect()',
+        (focus)='reloadSources()',
+        (click)='reloadSources()',
+        title='Source terminal whose output is filtered',
+    )
+        option(value='') — no source —
+        option(*ngFor='let s of sources', [value]='s.id') {{s.title}}
+
+    span.filter-stats.me-2(*ngIf='stats', title='Matched / total lines')
+        | {{stats.matched}}/{{stats.total}}
+    span.text-warning.me-2(*ngIf='stats && stats.invalidRegex', title='Invalid regex — using plain text matching')
+        i.fas.fa-exclamation-triangle
+    span.text-warning.me-2(
+        *ngIf='paused && stats && stats.pausedBufferedBytes > 0',
+        [title]="'Buffered while paused: ' + stats.pausedBufferedBytes + ' bytes' + (stats.pausedDropped ? ' (oldest dropped)' : '')",
+    )
+        i.fas.fa-pause-circle
+
+    .me-auto
+
+    button.btn.btn-sm.btn-link(
+        (click)='toggleRecording()',
+        [title]='recordingInfo ? recordingInfo.filePath : "Record filtered output to a log file"',
+    )
+        i.fas.fa-stop.text-danger(*ngIf='recordingInfo')
+        i.fas.fa-circle(*ngIf='!recordingInfo')
+        span {{ recordingInfo ? formatBytes(recordingInfo.bytes) : 'Record' }}
+    button.btn.btn-sm.btn-link((click)='togglePause()')
+        i.fas.fa-pause(*ngIf='!paused')
+        i.fas.fa-play(*ngIf='paused')
+        span {{ paused ? 'Resume' : 'Pause' }}
+    button.btn.btn-sm.btn-link.me-2((click)='clearOutput()', title='Clear the filter terminal')
+        i.fas.fa-eraser
+        span Clear

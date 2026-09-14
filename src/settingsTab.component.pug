@@ -1,0 +1,49 @@
+h3 Filter Output
+
+.form-line
+    .header
+        .title Filter history limit
+        .description How many recent filters are kept in the history dropdown (global)
+    input.form-control(
+        type='number',
+        min='0',
+        max='500',
+        [(ngModel)]='historyLimit',
+        (ngModelChange)='save()',
+    )
+
+.form-line
+    .header
+        .title Pause buffer limit (KB)
+        .description Maximum amount of output buffered while a filter is paused — oldest lines are dropped beyond it
+    input.form-control(
+        type='number',
+        min='64',
+        max='65536',
+        [(ngModel)]='pauseBufferLimitKB',
+        (ngModelChange)='save()',
+    )
+
+h3 Recordings
+
+.form-line
+    .header
+        .title Recording directory
+        .description Where recording files are written (absolute path; empty = your home directory)
+    input.form-control(
+        type='text',
+        placeholder='C:\Users\me\recordings',
+        [(ngModel)]='recordingDirectory',
+        (ngModelChange)='save()',
+    )
+
+.form-line
+    .header
+        .title Filename template
+        .description {{tokenHelp}}
+    input.form-control(
+        type='text',
+        placeholder='{date}_{time}.log',
+        [(ngModel)]='filenameTemplate',
+        (ngModelChange)='save()',
+    )
