@@ -7,12 +7,14 @@ Lines of the source terminal's output are matched against a keyword or regular e
 ## Features
 
 - **Split-pane workflow**: right-click any terminal → *Filter output to new pane...* → a filter terminal opens below it, bound to that terminal
+- **New-pane hotkey**: `Ctrl+Alt+N` (default) opens a filter pane below whichever terminal pane currently has focus
 - **New connection type**: "Filter output" also appears in the New terminal (+) dropdown
-- **Toolbar UI**: like SSH/Serial tabs, the filter terminal has a toolbar with everything in it — pattern input with an attached history dropdown button, `.*` / `!` / `Aa` toggle pills, source terminal selector, live match counter, Pause/Resume and Clear
+- **Toolbar UI**: like SSH/Serial tabs, the filter terminal has a toolbar with everything in it — pattern input with an attached history dropdown button, `.*` / `!` / `Aa` toggle pills, source terminal selector, live match counter, match-highlighting toggle, Pause/Resume and Clear
 - **Keyword / regex** line matching, with **invert** and **case-sensitive** options
+- **Match highlighting** (grep-style): matched substrings are colored bold red in the filter terminal — toggle it per filter from the toolbar, and set the default in Settings → Output Filter. Recordings always stay clean (no color codes in the log files)
 - **Colors preserved**: matching is done on plain text, but matched lines are forwarded with their ANSI colors intact
-- **Filter history**: recent filters are persisted globally; picking one from the history menu applies it immediately — the number of entries kept is configurable in Settings → Filter Output
-- **Hotkey**: `Ctrl+Alt+F` (default) focuses the pattern input; `Esc` returns focus to the terminal
+- **Filter history**: recent filters are persisted globally; picking one from the history menu applies it immediately — the number of entries kept is configurable in Settings → Output Filter
+- **Hotkeys**: `Ctrl+Alt+F` (default) focuses the pattern input (`Esc` returns focus to the terminal); `Ctrl+Alt+N` opens a new filter pane
 - **Recording to file**: two modes — **full recording** (everything a terminal outputs, save-output style, with a recording indicator at the terminal's top-right) and **filtered recording** (only the matched lines of a filter, from the filter toolbar's Record button). Recordings share output-stream subscriptions, so several filters recording the same terminal add no extra load on it. File paths are generated from a configurable directory + filename template (`{date}`, `{time}`, `{title}`, `{pattern}`, `{mode}`; default `{date}_{time}.log`)
 - **Robust binding**: survives SSH reconnects of the source; if the source tab is closed, the filter pane stays open and lets you pick another source
 
@@ -23,7 +25,7 @@ Lines of the source terminal's output are matched against a keyword or regular e
 3. Matching lines stream into the filter pane; the toolbar shows a live `matched/total` counter
 4. Switch the source terminal at any time; open the **history dropdown** (clock icon next to the pattern input) to re-apply a recent filter or clear the history
 
-Settings → **Filter Output** configures the history limit, the pause buffer size, and recording defaults (directory + filename template). Recording can also be started/stopped from the terminal right-click menu.
+Settings → **Output Filter** configures the history limit, match highlighting default, the pause buffer size, and recording defaults (directory + filename template). Recording can also be started/stopped from the terminal right-click menu.
 
 An empty pattern passes every line through (a live `tail -f` view of the terminal).
 
