@@ -55,6 +55,11 @@ export function toCrlf (data: Buffer): Buffer {
     return Buffer.from(data.toString('utf8').replace(/(?<!\r)\n/g, '\r\n'))
 }
 
+/** Escapes regex metacharacters so a literal pattern can be highlighted */
+function escapeRegExp (text: string): string {
+    return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
 /**
  * Line-oriented stream filter.
  *
@@ -76,6 +81,8 @@ export class LineFilter {
     private pausedDroppedLineCount = 0
     private paused = false
     private regexCache: RegExp|null = null
+    private highlightRegex: RegExp|null = null
+    private highlightEnabled = true
     private lowercasePattern = ''
     private matcher: MatcherOptions = {
         pattern: '',
@@ -114,6 +121,7 @@ export class LineFilter {
         this.matcher = { ...options }
         this.stats.invalidRegex = false
         this.regexCache = null
+        this.highlightRegex = null
         this.lowercasePattern = options.caseSensitive ? options.pattern : options.pattern.toLowerCase()
         if (options.pattern && options.isRegex) {
             try {
@@ -123,6 +131,40 @@ export class LineFilter {
                 this.stats.invalidRegex = true
             }
         }
+        // Grep-style match highlighting: a global variant of the same match,
+        // using the literal pattern when the regex is invalid
+        if (options.pattern) {
+            const flags = options.caseSensitive ? 'g' : 'gi'
+            try {
+                const source = options.isRegex && !this.stats.invalidRegex
+                    ? options.pattern
+                    : escapeRegExp(options.pattern)
+                this.highlightRegex = new RegExp(source, flags)
+            } catch {
+                this.highlightRegex = null
+            }
+        }
+    }
+
+    setHighlightEnabled (enabled: boolean): void {
+        this.highlightEnabled = enabled
+    }
+
+    isHighlightEnabled (): boolean {
+        return this.highlightEnabled
+    }
+
+    /**
+     * Wraps every match occurrence in SGR bold-red / minimal-reset codes, for
+     * terminal display only. Applied after process()/drain, never in the
+     * recorded stream. The closing sequence only resets foreground color and
+     * intensity, so any other styling on the line survives.
+     */
+    highlight (data: Buffer): Buffer {
+        if (!this.highlightEnabled || !this.highlightRegex || !data.length) {
+            return data
+        }
+        return Buffer.from(data.toString('utf8').replace(this.highlightRegex, m => `\x1b[31;1m${m}\x1b[39;22m`))
     }
 
     /** Drop any unterminated partial line (used when clearing output) */

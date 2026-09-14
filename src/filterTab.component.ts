@@ -26,6 +26,7 @@ export class FilterTabComponent extends ConnectableTerminalTabComponent<FilterPr
     caseSensitive: boolean
     invert: boolean
     paused = false
+    highlightMatches = true
     selectedSourceId: string|null = null
 
     history: FilterHistoryEntry[] = []
@@ -69,6 +70,7 @@ export class FilterTabComponent extends ConnectableTerminalTabComponent<FilterPr
         super.ngOnInit()
 
         this.disableDynamicTitle = true
+        this.highlightMatches = this.config.store.outputFilter?.highlightMatches ?? true
         this.pattern = this.profile.options.pattern
         this.isRegex = this.profile.options.isRegex
         this.caseSensitive = this.profile.options.caseSensitive
@@ -100,6 +102,7 @@ export class FilterTabComponent extends ConnectableTerminalTabComponent<FilterPr
         await session.start()
 
         session.filter.setMatcher(this.profile.options)
+        session.filter.setHighlightEnabled(this.highlightMatches)
         this.bindSource(this.profile.options.sourceTabId)
 
         if (!this.profile.options.pattern && this.hasFocus) {
@@ -193,6 +196,11 @@ export class FilterTabComponent extends ConnectableTerminalTabComponent<FilterPr
     togglePause (): void {
         this.paused = !this.paused
         this.onPanelPause(this.paused)
+    }
+
+    toggleHighlight (): void {
+        this.highlightMatches = !this.highlightMatches
+        this.session?.filter.setHighlightEnabled(this.highlightMatches)
     }
 
     onPanelPause (paused: boolean): void {

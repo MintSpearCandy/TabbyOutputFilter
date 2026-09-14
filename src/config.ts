@@ -6,6 +6,7 @@ export class FilterConfigProvider extends ConfigProvider {
         outputFilter: {
             history: [],
             historyLimit: 20,
+            highlightMatches: true,
             pauseBufferLimitBytes: 1 << 20,
             recording: {
                 directory: null,
@@ -15,6 +16,7 @@ export class FilterConfigProvider extends ConfigProvider {
         hotkeys: {
             'output-filter': {
                 'toggle-panel': 'ctrl+alt+f',
+                'new-pane': 'ctrl+alt+n',
             },
         },
     }

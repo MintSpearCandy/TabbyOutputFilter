@@ -3,7 +3,8 @@ import { Subject, Subscription } from 'rxjs'
 import * as fs from 'fs'
 import * as os from 'os'
 import * as path from 'path'
-import { ConfigService, NotificationsService } from 'tabby-core'
+import { ConfigService } from 'tabby-core'
+import { ToastrService } from 'ngx-toastr'
 import { BaseTerminalTabComponent } from 'tabby-terminal'
 import { FilterRegistryService } from './filterRegistry'
 import { FilterSession } from './filterSession'
@@ -37,6 +38,15 @@ interface FilteredRecording {
     recording: ActiveRecording
 }
 
+/** Toast options for recording events — the path is the useful part, so the
+ * default 1s notice is far too short to read (or hover-copy) it */
+const TOAST_LONG = {
+    timeOut: 8000,
+    extendedTimeOut: 4000,
+    closeButton: true,
+    tapToDismiss: true,
+}
+
 /**
  * Manages output recordings.
  *
@@ -58,7 +68,7 @@ export class RecordingManager {
     constructor (
         private registry: FilterRegistryService,
         private config: ConfigService,
-        private notifications: NotificationsService,
+        private toastr: ToastrService,
         private zone: NgZone,
     ) {
         this.registry.sourceClosed$.subscribe(id => {
@@ -95,13 +105,13 @@ export class RecordingManager {
             })
             fs.mkdirSync(path.dirname(filePath), { recursive: true })
         } catch (e) {
-            this.notifications.error(`Could not create recording file: ${e.message}`)
+            this.toastr.error(`Could not create recording file: ${e.message}`, undefined, TOAST_LONG)
             return
         }
 
         const stream = fs.createWriteStream(filePath)
         stream.on('error', e => {
-            this.notifications.error(`Recording error: ${e.message}`)
+            this.toastr.error(`Recording error: ${e.message}`, undefined, TOAST_LONG)
             this.stopFullRecording(id)
         })
 
@@ -114,7 +124,7 @@ export class RecordingManager {
 
         this.full.set(id, { tab, recording: { mode: 'full', filePath, stream, startedAt: Date.now() }, sub, ui })
         this.emitChanged()
-        this.notifications.notice(`Recording full output to ${filePath}`)
+        this.toastr.info(`Recording full output to ${filePath}`, undefined, TOAST_LONG)
     }
 
     private stopFullRecording (id: string): void {
@@ -159,13 +169,13 @@ export class RecordingManager {
             })
             fs.mkdirSync(path.dirname(filePath), { recursive: true })
         } catch (e) {
-            this.notifications.error(`Could not create recording file: ${e.message}`)
+            this.toastr.error(`Could not create recording file: ${e.message}`, undefined, TOAST_LONG)
             return
         }
 
         const stream = fs.createWriteStream(filePath)
         stream.on('error', e => {
-            this.notifications.error(`Recording error: ${e.message}`)
+            this.toastr.error(`Recording error: ${e.message}`, undefined, TOAST_LONG)
             this.stopFilteredRecording(session)
         })
 
@@ -188,7 +198,7 @@ export class RecordingManager {
 
         this.filtered.set(session, { sub, recording: { mode: 'filtered', filePath, stream, startedAt: Date.now() } })
         this.emitChanged()
-        this.notifications.notice(`Recording filtered output to ${filePath}`)
+        this.toastr.info(`Recording filtered output to ${filePath}`, undefined, TOAST_LONG)
     }
 
     private stopFilteredRecording (session: FilterSession): void {
@@ -210,7 +220,7 @@ export class RecordingManager {
         }
         const kb = Math.max(1, Math.round(recording.stream.bytesWritten / 1024))
         this.zone.run(() => {
-            this.notifications.notice(`Recording saved (${kb} KB): ${recording.filePath}`)
+            this.toastr.info(`Recording saved (${kb} KB): ${recording.filePath}`, undefined, TOAST_LONG)
         })
     }
 

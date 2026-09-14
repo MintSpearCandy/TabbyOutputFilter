@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core'
 import { Subject } from 'rxjs'
-import { AppService, BaseTabComponent, SplitTabComponent, TabsService } from 'tabby-core'
+import { AppService, BaseTabComponent, HotkeysService, SplitTabComponent, TabsService } from 'tabby-core'
 import { BaseTerminalTabComponent } from 'tabby-terminal'
 import { FilterOptions, FilterProfile, makeFilterProfile } from './api'
 import type { FilterTabComponent } from './filterTab.component'
@@ -27,7 +27,23 @@ export class FilterRegistryService {
     constructor (
         private app: AppService,
         private tabsService: TabsService,
-    ) { }
+        hotkeys: HotkeysService,
+    ) {
+        hotkeys.hotkey$.subscribe(hotkey => {
+            if (hotkey !== 'output-filter.new-pane') {
+                return
+            }
+            // Open a filter pane below whichever terminal pane has focus
+            const active = this.app.activeTab
+            const focused = active instanceof SplitTabComponent ? active.getFocusedTab() : active
+            if (focused instanceof BaseTerminalTabComponent) {
+                const { FilterTabComponent } = require('./filterTab.component')
+                if (!(focused instanceof FilterTabComponent)) {
+                    this.openFilterPane(focused, {})
+                }
+            }
+        })
+    }
 
     getId (tab: BaseTabComponent): string {
         let id = this.idByTab.get(tab)

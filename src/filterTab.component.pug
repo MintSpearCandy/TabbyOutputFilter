@@ -62,6 +62,12 @@ terminal-toolbar(
 
     .me-auto
 
+    button.btn.btn-sm.btn-link.filter-display-toggle(
+        (click)='toggleHighlight()',
+        [class.off]='!highlightMatches',
+        [title]='highlightMatches ? "Match highlighting: on — click to disable" : "Match highlighting: off — click to enable"',
+    )
+        i.fas.fa-highlighter
     button.btn.btn-sm.btn-link(
         (click)='toggleRecording()',
         [title]='recordingInfo ? recordingInfo.filePath : "Record filtered output to a log file"',

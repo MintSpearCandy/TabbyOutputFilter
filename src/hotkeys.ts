@@ -9,6 +9,10 @@ export class FilterHotkeyProvider extends HotkeyProvider {
             id: 'output-filter.toggle-panel',
             name: this.translate.instant('Focus the filter pattern input'),
         },
+        {
+            id: 'output-filter.new-pane',
+            name: this.translate.instant('Open a filter pane below the current terminal'),
+        },
     ]
 
     constructor (private translate: TranslateService) {

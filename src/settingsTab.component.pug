@@ -24,6 +24,17 @@ h3 Filter Output
         (ngModelChange)='save()',
     )
 
+.form-line
+    .header
+        .title Highlight matched text
+        .description Color matched substrings in the filter terminal (grep-style) by default; can be toggled per filter from its toolbar
+    div
+        input.form-check-input(
+            type='checkbox',
+            [(ngModel)]='highlightMatches',
+            (ngModelChange)='save()',
+        )
+
 h3 Recordings
 
 .form-line

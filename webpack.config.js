@@ -47,6 +47,7 @@ module.exports = {
   },
   externals: [
     'fs',
+    'ngx-toastr',
     /^rxjs/,
     /^@angular/,
     /^@ng-bootstrap/,

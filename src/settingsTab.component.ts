@@ -8,6 +8,7 @@ import { ConfigService } from 'tabby-core'
 export class FilterSettingsTabComponent {
     historyLimit: number
     pauseBufferLimitKB: number
+    highlightMatches: boolean
     recordingDirectory: string
     filenameTemplate: string
 
@@ -19,6 +20,7 @@ export class FilterSettingsTabComponent {
     constructor (public config: ConfigService) {
         this.historyLimit = config.store.outputFilter?.historyLimit ?? 20
         this.pauseBufferLimitKB = Math.round((config.store.outputFilter?.pauseBufferLimitBytes ?? 1048576) / 1024)
+        this.highlightMatches = config.store.outputFilter?.highlightMatches ?? true
         this.recordingDirectory = config.store.outputFilter?.recording?.directory ?? ''
         this.filenameTemplate = config.store.outputFilter?.recording?.filenameTemplate ?? '{date}_{time}.log'
     }
@@ -28,6 +30,7 @@ export class FilterSettingsTabComponent {
         store.outputFilter ??= {}
         store.outputFilter.historyLimit = this.clamp(this.historyLimit, 0, 500, 20)
         store.outputFilter.pauseBufferLimitBytes = this.clamp(this.pauseBufferLimitKB, 64, 65536, 1024) * 1024
+        store.outputFilter.highlightMatches = !!this.highlightMatches
         store.outputFilter.recording ??= {}
         store.outputFilter.recording.directory = this.recordingDirectory.trim() || null
         store.outputFilter.recording.filenameTemplate = this.filenameTemplate.trim() || '{date}_{time}.log'

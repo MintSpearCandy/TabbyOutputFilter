@@ -160,4 +160,65 @@ run('toCrlf passes through data without newlines', () => {
     assert.strictEqual(toCrlf(input), input)
 })
 
+run('highlight wraps keyword matches in SGR codes', () => {
+    const f = new LineFilter()
+    f.setMatcher({ pattern: 'error', isRegex: false, caseSensitive: false, invert: false })
+    const out = f.highlight(Buffer.from('an Error occurred\n'))
+    assert.strictEqual(
+        out.toString('utf8'),
+        'an \x1b[31;1mError\x1b[39;22m occurred\n')
+})
+
+run('highlight escapes literal metacharacters', () => {
+    const f = new LineFilter()
+    f.setMatcher({ pattern: 'a.b', isRegex: false, caseSensitive: true, invert: false })
+    const out = f.highlight(Buffer.from('a.b axb\n'))
+    // only the literal a.b is highlighted, axb (regex would match) is not
+    assert.strictEqual(
+        out.toString('utf8'),
+        '\x1b[31;1ma.b\x1b[39;22m axb\n')
+})
+
+run('highlight works for regex mode', () => {
+    const f = new LineFilter()
+    f.setMatcher({ pattern: 'time[=<]\\d+', isRegex: true, caseSensitive: false, invert: false })
+    const out = f.highlight(Buffer.from('time=10 ms\n'))
+    assert.strictEqual(
+        out.toString('utf8'),
+        '\x1b[31;1mtime=10\x1b[39;22m ms\n')
+})
+
+run('highlight disabled returns data unchanged', () => {
+    const f = new LineFilter()
+    f.setMatcher({ pattern: 'x', isRegex: false, caseSensitive: false, invert: false })
+    f.setHighlightEnabled(false)
+    const input = Buffer.from('xx x\n')
+    assert.strictEqual(f.highlight(input), input)
+})
+
+run('highlight no-ops without a pattern', () => {
+    const f = new LineFilter()
+    f.setMatcher({ pattern: '', isRegex: false, caseSensitive: false, invert: false })
+    const input = Buffer.from('anything\n')
+    assert.strictEqual(f.highlight(input), input)
+})
+
+run('process() output stays clean for recordings, highlight is opt-in', () => {
+    const f = new LineFilter()
+    f.setMatcher({ pattern: 'ERROR', isRegex: false, caseSensitive: false, invert: false })
+    const out = f.process(Buffer.from('ERROR boom\n'))
+    assert.strictEqual(out.toString('utf8'), 'ERROR boom\n') // no SGR codes
+    assert.ok(f.highlight(out).toString('utf8').includes('\x1b[31;1m'))
+})
+
+run('invalid regex falls back to literal highlight', () => {
+    const f = new LineFilter()
+    f.setMatcher({ pattern: 'a[b', isRegex: true, caseSensitive: false, invert: false })
+    assert.ok(f.stats.invalidRegex)
+    const out = f.highlight(Buffer.from('contains a[b here\n'))
+    assert.strictEqual(
+        out.toString('utf8'),
+        'contains \x1b[31;1ma[b\x1b[39;22m here\n')
+})
+
 console.log(process.exitCode ? '\nSOME TESTS FAILED' : '\nALL TESTS PASSED')
