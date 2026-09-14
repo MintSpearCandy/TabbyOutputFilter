@@ -86,7 +86,8 @@ async function api (token, slug, url, { method = 'GET', body, contentType } = {}
 }
 
 function releaseBody () {
-    const manual = path.join(root, 'release', 'release-body.md')
+    // Lives in the project root: scripts/package.js wipes release/ on every run
+    const manual = path.join(root, 'RELEASE_NOTES.md')
     if (fs.existsSync(manual)) {
         return fs.readFileSync(manual, 'utf8')
     }
