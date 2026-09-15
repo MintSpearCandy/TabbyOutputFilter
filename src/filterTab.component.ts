@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, ElementRef, Injector, ViewChild } from '@angular/core'
-import { SubscriptionContainer } from 'tabby-core'
+import { SplitTabComponent, SubscriptionContainer } from 'tabby-core'
 import { BaseTerminalTabComponent, ConnectableTerminalTabComponent } from 'tabby-terminal'
 import { FilterHistoryEntry, FilterProfile, historyEntryKey } from './api'
 import { FilterRegistryService } from './filterRegistry'
@@ -36,6 +36,7 @@ export class FilterTabComponent extends ConnectableTerminalTabComponent<FilterPr
     @ViewChild('historyButton') historyButton: ElementRef
 
     private sourceSubs = new SubscriptionContainer()
+    private inputSubs = new SubscriptionContainer()
     private statsTick: number|null = null
     private historyMenu: HTMLElement|null = null
     private historyMenuDismiss: ((e: Event) => void)|null = null
@@ -105,6 +106,18 @@ export class FilterTabComponent extends ConnectableTerminalTabComponent<FilterPr
         session.filter.setHighlightEnabled(this.highlightMatches)
         this.bindSource(this.profile.options.sourceTabId)
 
+        // Bare Enter in the pane swings focus back to the pattern input
+        // (pane keystrokes go nowhere, so the key is free to repurpose).
+        // Re-subscribed per initializeSession: reconnect-safe.
+        this.inputSubs.cancelAll()
+        if (this.frontend) {
+            this.inputSubs.subscribe(this.frontend.input$, data => {
+                if (data.toString('utf8') === '\r') {
+                    this.focusPatternInput()
+                }
+            })
+        }
+
         if (!this.profile.options.pattern && this.hasFocus) {
             setImmediate(() => this.focusPatternInput())
         }
@@ -116,6 +129,7 @@ export class FilterTabComponent extends ConnectableTerminalTabComponent<FilterPr
             window.clearInterval(this.statsTick)
         }
         this.sourceSubs.cancelAll()
+        this.inputSubs.cancelAll()
         super.ngOnDestroy()
         this.session?.destroy()
     }
@@ -147,6 +161,52 @@ export class FilterTabComponent extends ConnectableTerminalTabComponent<FilterPr
         if (input) {
             input.focus()
             input.select()
+            // Frontend.focus() is deferred (setTimeout 0) in tabby-terminal:
+            // a pending terminal-focus grab scheduled before this call lands
+            // AFTER it and steals focus from the input. Re-assert a tick
+            // later to win over any delay-0 grab.
+            setTimeout(() => {
+                if (document.activeElement !== input) {
+                    input.focus()
+                    input.select()
+                }
+            }, 50)
+        }
+    }
+
+    onPatternEnter (): void {
+        this.applyFilter()
+        // Hand focus back to the terminal: while this <input> keeps DOM focus,
+        // HotkeysService suppresses every hotkey app-wide (input:focus filter),
+        // including pane navigation. Enter in the pane swings back.
+        this.syncSplitFocusAnchor()
+        this.frontend?.focus()
+    }
+
+    onToolbarClick (event: MouseEvent): void {
+        event.stopPropagation()
+        const target = event.target as HTMLElement|null
+        if (target?.closest('input:not([type=checkbox]), select')) {
+            // Text controls keep their focus — the anchor sync yanks focus
+            // to the terminal, which made the pattern input impossible to
+            // click into. The anchor catches up when focus actually moves:
+            // Enter, source selection, or the button branch below. (Pane-nav
+            // hotkeys are suppressed while an input holds focus anyway.)
+            return
+        }
+        // Buttons/pills: anchor this pane and land focus in the terminal
+        this.syncSplitFocusAnchor()
+    }
+
+    /**
+     * SplitTabComponent tracks its focused pane from clicks that bubble out
+     * of the pane — our toolbar swallows those, so its pane-nav anchor can go
+     * stale and pane-switch hotkeys navigate from the wrong pane. This
+     * re-anchors it (focus() also refocuses this terminal).
+     */
+    private syncSplitFocusAnchor (): void {
+        if (this.parent instanceof SplitTabComponent) {
+            this.parent.focus(this)
         }
     }
 
@@ -191,6 +251,8 @@ export class FilterTabComponent extends ConnectableTerminalTabComponent<FilterPr
         if (this.selectedSourceId) {
             this.profile.options.sourceTabId = this.selectedSourceId
         }
+        // Dropdown interaction is done: anchor + land focus in the terminal
+        this.syncSplitFocusAnchor()
     }
 
     togglePause (): void {

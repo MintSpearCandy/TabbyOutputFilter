@@ -1,6 +1,6 @@
 terminal-toolbar(
     [tab]='this',
-    (click)='$event.stopPropagation()',
+    (click)='onToolbarClick($event)',
     (mousedown)='$event.stopPropagation()',
     (mouseup)='$event.stopPropagation()',
     (dblclick)='$event.stopPropagation()',
@@ -15,7 +15,7 @@ terminal-toolbar(
             #patternInput,
             type='text',
             [(ngModel)]='pattern',
-            (keyup.enter)='!$event.isComposing && applyFilter()',
+            (keydown.enter)='!$event.isComposing && onPatternEnter()',
             (change)='applyFilter()',
             (keyup.escape)='!$event.isComposing && onPatternEscape()',
             placeholder='Filter pattern (empty = show all lines)',

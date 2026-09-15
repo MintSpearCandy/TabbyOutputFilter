@@ -19,6 +19,7 @@ export class FilterRegistryService {
     private idByTab = new WeakMap<BaseTabComponent, string>()
     private tabsById = new Map<string, BaseTabComponent>()
     private counter = 0
+    private lastPaneOpenedAt = 0
     private sourceClosed = new Subject<string>()
 
     /** Emits the registry id of a source tab that was closed */
@@ -39,7 +40,14 @@ export class FilterRegistryService {
             if (focused instanceof BaseTerminalTabComponent) {
                 const { FilterTabComponent } = require('./filterTab.component')
                 if (!(focused instanceof FilterTabComponent)) {
-                    this.openFilterPane(focused, {})
+                    // Re-entry guard: a duplicated plugin copy registering this
+                    // handler twice, or an auto-repeated keydown (HotkeysService
+                    // does not filter event.repeat), must not open a second
+                    // pane from a single key press
+                    if (Date.now() - this.lastPaneOpenedAt > 500) {
+                        this.lastPaneOpenedAt = Date.now()
+                        this.openFilterPane(focused, {})
+                    }
                 }
             }
         })

@@ -1,6 +1,6 @@
 {
   "name": "tabby-output-filter",
-  "version": "0.5.0",
+  "version": "0.5.5",
   "description": "Stream keyword/regex filtered output of one terminal into another terminal pane",
   "keywords": [
     "tabby-plugin"
